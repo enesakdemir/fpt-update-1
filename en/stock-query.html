@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Query - FPT Spare Parts</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .banner {
+            background-color: #c20006;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 50px 20px;
+            height: 200px;
+        }
+
+        .stock-query-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .query-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .query-form input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .query-form button {
+            padding: 10px 20px;
+            background-color: #c20006;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .query-form button:hover {
+            background-color: #a30005;
+        }
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .result-table th, .result-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .result-table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        .result-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        .stock-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .in-stock {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .low-stock {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+        .out-stock {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .info-text {
+            text-align: center;
+            color: #666;
+            margin: 20px 0;
+        }
+        .offer-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #ffdddd;
+            color: #c20006;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .offer-button:hover {
+            background-color: #ffcaca;
+            color: #a30005;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="/en/index.html">
+                <h1>FPT SPARE PARTS</h1>
+            </a>
+            <a class="lang" href="/index.html">
+                <img src="/image/tr.png" alt="turkish">
+            </a>
+        </div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+            <a href="contact.html">Contact</a>
+            <a href="stock-query.html">Stock Query</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="banner">
+            <div class="frame">
+                <h2>Stock Query</h2>
+                <p>To request a quote, please send your parts list with part numbers and quantities via email.</p>
+            </div>
+
+            <a href="#" id="offerButton" class="offer-button">Request Quote</a>
+
+        </section>
+
+        <section class="content">
+            <b>Quick stock check by part number</b>
+        </section>
+
+        <div class="stock-query-container">
+            <div class="query-form">
+                <input type="text" id="partNumber" placeholder="Enter part number (e.g., 504385483)" />
+                <button onclick="checkStock()">Query</button>
+            </div>
+
+            <p class="info-text">To query multiple part numbers, separate them with commas.</p>
+
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>Part Number</th>
+                        <th>Part Name</th>
+                        <th>Stock Status</th>
+                    </tr>
+                </thead>
+                <tbody id="resultBody">
+                    <!-- Dynamic data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 FPT Spare Parts - All rights reserved.</p>
+    </footer>
+
+    <script>
+        let stockData = [];
+
+        async function fetchStockData() {
+            try {
+                const response = await fetch('../dataStock.json');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                stockData = await response.json();
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        }
+
+        async function checkStock() {
+            const partNumberInput = document.getElementById('partNumber').value.trim();
+            const resultBody = document.getElementById('resultBody');
+
+            if (!partNumberInput) {
+                alert("Please enter a part number.");
+                return;
+            }
+
+            const queryParts = partNumberInput.split(',').map(part => part.trim());
+            resultBody.innerHTML = '';
+
+            await fetchStockData();
+
+            queryParts.forEach(query => {
+                console.log(stockData);
+                const result = stockData.find(item => item.partNumber === query);
+
+                if (result) {
+                    let stockText = '';
+                    let stockClass = '';
+                    if (result.stock === 0) {
+                        stockText = 'Out of Stock';
+                        stockClass = 'out-stock';
+                    } else if (result.stock >= 1 && result.stock <= 5) {
+                        stockText = `Limited Stock`;
+                        stockClass = 'low-stock';
+                    } else {
+                        stockText = 'In Stock';
+                        stockClass = 'in-stock';
+                    }
+                    resultBody.innerHTML += `
+                        <tr>
+                            <td>${result.partNumber}</td>
+                            <td>${result.partName}</td>
+                            <td><span class="stock-status ${stockClass}">${stockText}</span></td>
+                        </tr>
+                    `;
+                } else {
+                    resultBody.innerHTML += `
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: #c62828;">
+                                Part with number "${query}" not found.
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+
+            updateOfferButton();
+        }
+
+        function updateOfferButton() {
+            const resultBody = document.getElementById('resultBody');
+            const rows = Array.from(resultBody.querySelectorAll('tr'));
+
+            if (rows.length > 0) {
+                const partDetails = rows.map(row => {
+                    const cells = row.querySelectorAll('td');
+                    return `${cells[0]?.innerText || ''} - ${cells[1]?.innerText || ''}`;
+                }).join('%0A');
+
+                const mailtoLink = `mailto:info@fptspareparts.com?subject=Request%20for%20Quote&body=I%20would%20like%20to%20request%20information%20about%20the%20following%20parts:%0A%0A${partDetails}`;
+
+                document.getElementById('offerButton').setAttribute('href', mailtoLink);
+            }
+        }
+    </script>
+</body>
+</html>
