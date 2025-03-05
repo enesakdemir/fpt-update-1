@@ -158,78 +158,98 @@
                     </tr>
                 </thead>
                 <tbody id="resultBody">
-                    <!-- Dinamik veri eklenecek -->
+                    <!-- Dynamic data will be inserted here -->
                 </tbody>
             </table>
         </div>
     </main>
 
     <footer>
-        <p>&copy; 2024 FPT Spare Parts - Tüm hakları saklıdır.</p>
+        <p>&copy; 2024 FPT Spare Parts - All rights reserved.</p>
     </footer>
 
     <script>
-       let stockData = [];
+        let stockData = [];
 
-async function fetchStockData() {
-    try {
-        const response = await fetch('dataStock.json');
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        stockData = await response.json();
-    } catch (error) {
-        console.error('Fetch error:', error);
-    }
-}
-
-async function checkStock() {
-    const partNumberInput = document.getElementById('partNumber').value.trim();
-    const resultBody = document.getElementById('resultBody');
-
-    if (!partNumberInput) {
-        alert("Lütfen bir parça numarası giriniz.");
-        return;
-    }
-
-    const queryParts = partNumberInput.split(',').map(part => part.trim());
-    resultBody.innerHTML = '';
-
-    await fetchStockData();
-
-    queryParts.forEach(query => {
-        const result = stockData.find(item => item.partNumber === query);
-
-        if (result) {
-            let stockText = '';
-            let stockClass = '';
-            if (result.stock === 0) {
-                stockText = 'Stokta Yok';
-                stockClass = 'out-stock';
-            } else if (result.stock >= 1 && result.stock <= 5) {
-                stockText = `Sınırlı Stok`;
-                stockClass = 'low-stock';
-            } else {
-                stockText = 'Stokta Var';
-                stockClass = 'in-stock';
+        async function fetchStockData() {
+            try {
+                const response = await fetch('../dataStock.json');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                stockData = await response.json();
+            } catch (error) {
+                console.error('Fetch error:', error);
             }
-            resultBody.innerHTML += `
-                <tr>
-                    <td>${result.partNumber}</td>
-                    <td>${result.partName}</td>
-                    <td><span class="stock-status ${stockClass}">${stockText}</span></td>
-                </tr>
-            `;
-        } else {
-            resultBody.innerHTML += `
-                <tr>
-                    <td colspan="3" style="text-align: center; color: #c62828;">
-                    "${query}" numaralı parça bulunamadı.
-                </td>
-            </tr>
-        `;
         }
-    });
 
-    updateOfferButton();
-}
+        async function checkStock() {
+            const partNumberInput = document.getElementById('partNumber').value.trim();
+            const resultBody = document.getElementById('resultBody');
+
+            if (!partNumberInput) {
+                alert("Please enter a part number.");
+                return;
+            }
+
+            const queryParts = partNumberInput.split(',').map(part => part.trim());
+            resultBody.innerHTML = '';
+
+            await fetchStockData();
+
+            queryParts.forEach(query => {
+                console.log(stockData);
+                const result = stockData.find(item => item.partNumber === query);
+
+                if (result) {
+                    let stockText = '';
+                    let stockClass = '';
+                    if (result.stock === 0) {
+                        stockText = 'Out of Stock';
+                        stockClass = 'out-stock';
+                    } else if (result.stock >= 1 && result.stock <= 5) {
+                        stockText = `Limited Stock`;
+                        stockClass = 'low-stock';
+                    } else {
+                        stockText = 'In Stock';
+                        stockClass = 'in-stock';
+                    }
+                    resultBody.innerHTML += `
+                        <tr>
+                            <td>${result.partNumber}</td>
+                            <td>${result.partName}</td>
+                            <td><span class="stock-status ${stockClass}">${stockText}</span></td>
+                        </tr>
+                    `;
+                } else {
+                    resultBody.innerHTML += `
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: #c62828;">
+                                Part with number "${query}" not found.
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+
+            updateOfferButton();
+        }
+
+        function updateOfferButton() {
+            const resultBody = document.getElementById('resultBody');
+            const rows = Array.from(resultBody.querySelectorAll('tr'));
+
+            if (rows.length > 0) {
+                const partDetails = rows.map(row => {
+                    const cells = row.querySelectorAll('td');
+                    return `${cells[0]?.innerText || ''} - ${cells[1]?.innerText || ''}`;
+                }).join('%0A');
+
+                const mailtoLink = `mailto:info@fptspareparts.com?subject=Request%20for%20Quote&body=I%20would%20like%20to%20request%20information%20about%20the%20following%20parts:%0A%0A${partDetails}`;
+
+                document.getElementById('offerButton').setAttribute('href', mailtoLink);
+            }
+        }
+    </script>
+</body>
+</html>
