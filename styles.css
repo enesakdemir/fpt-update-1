@@ -350,3 +350,20 @@ body {
   border-radius: 25px; /* Köşeleri ovalleştirir */
   margin-bottom: 40px; /* Buton ile çerçeve arasında boşluk */
 }
+
+.map-container {
+  text-align: center;
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.map-container iframe {
+  width: 150%; /* Neredeyse tam ekran genişlik */
+  max-width: 2600px; /* Daha da yatay hale getirildi */
+  height: 300px; /* Yüksekliği azaltıldı */
+  border-radius: 10px; /* Köşeleri hafif yuvarlattık */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border: none;
+}
