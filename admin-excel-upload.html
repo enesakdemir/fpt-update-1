@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <script>
+    if (localStorage.getItem("loggedIn") !== "true") {
+      window.location.href = "login.html";
+    }
+  </script>
+  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 2rem; }
+    .container { max-width: 900px; margin: auto; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
+    input[type=file], button { margin: 0.5rem 0; padding: 0.6rem; font-size: 16px; }
+    pre { background: #f0f0f0; padding: 1rem; max-height: 300px; overflow: auto; border-radius: 5px; }
+    .json-table { width: 100%; margin-top: 1rem; border-collapse: collapse; }
+    .json-table th, .json-table td { padding: 0.5rem; border: 1px solid #ccc; text-align: left; }
+    .json-table td input { width: 100%; }
+    .action-buttons button { margin-right: 5px; }
+  </style>
+</head>
+<body>
+  <button onclick="logout()" style="float: right; margin-bottom: 10px;">Çıkış Yap</button>
+
+  <script>
+    // Sayfa yüklendiğinde çalışır
+    window.onload = function () {
+      const isLoggedIn = localStorage.getItem("loggedIn");
+      if (isLoggedIn !== "true") {
+        window.location.href = "login.html"; // Giriş yapılmamışsa yönlendir
+      }
+    }
+  </script>
+  
+  <div class="container">
+    <h2>Excel'den JSON'a Veri Yükle</h2>
+    <input type="file" id="excelFile" accept=".xlsx,.xls" />
+    <button onclick="convertToJSON()">Dönüştür</button>
+    <button onclick="saveJSON()">Kaydet</button>
+    <button onclick="exportCSV()">CSV Olarak Dışa Aktar</button>
+    <div id="tableContainer"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    let currentJSON = [];
+
+    function convertToJSON() {
+      const fileInput = document.getElementById('excelFile');
+      const file = fileInput.files[0];
+      if (!file) return alert("Dosya seçmedin reis.");
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const raw = XLSX.utils.sheet_to_json(sheet);
+        currentJSON = raw.map(item => ({
+          partNumber: item["Madde kodu"] || "",
+          partName: item["Ürün adı"] || "",
+          stock: parseInt(item["Toplam kullanılabilir miktar"] || 0)
+        }));
+        renderTable();
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function renderTable() {
+      const container = document.getElementById("tableContainer");
+      if (currentJSON.length === 0) return container.innerHTML = "<p>Veri yok</p>";
+
+      let html = '<table class="json-table"><thead><tr><th>Part No</th><th>Part Adı</th><th>Stok</th><th>İşlem</th></tr></thead><tbody>';
+      currentJSON.forEach((item, index) => {
+        html += `<tr>
+          <td><input value="${item.partNumber}" onchange="updateField(${index}, 'partNumber', this.value)" /></td>
+          <td><input value="${item.partName}" onchange="updateField(${index}, 'partName', this.value)" /></td>
+          <td><input value="${item.stock}" onchange="updateField(${index}, 'stock', parseInt(this.value))" /></td>
+          <td class="action-buttons">
+            <button onclick="deleteRow(${index})">Sil</button>
+          </td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function updateField(index, key, value) {
+      currentJSON[index][key] = value;
+    }
+
+    function deleteRow(index) {
+      currentJSON.splice(index, 1);
+      renderTable();
+    }
+
+    function saveJSON() {
+      fetch('/save-json', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentJSON)
+      }).then(res => res.json()).then(data => {
+        alert("Veri kaydedildi.");
+      });
+    }
+
+    function exportCSV() {
+      const csv = [
+        ["partNumber", "partName", "stock"],
+        ...currentJSON.map(row => [row.partNumber, row.partName, row.stock])
+      ].map(e => e.join(",")).join("\n");
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "export.csv";
+      a.click();
+    }
+  </script>
+  <script>
+    function logout() {
+      localStorage.removeItem("loggedIn");
+      window.location.href = "login.html";
+    }
+  </script>
+  
+</body>
+</html>

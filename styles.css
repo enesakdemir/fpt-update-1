@@ -367,3 +367,37 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border: none;
 }
+
+/* Admin Giriş butonu */
+.admin-btn {
+  background-color: #000;
+  color: #fff;
+  padding: 8px 16px;
+  margin-left: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.admin-btn:hover {
+  background-color: #444;
+}
+
+/* Navbar'da admin butonu için */
+.admin-btn {
+  background-color: transparent;
+  color: #fff;
+  padding: 8px 14px;
+  border: 1px solid #fff;
+  border-radius: 20px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.admin-btn:hover {
+  background-color: #fff;
+  color: #c00; /* Kırmızı tonun varsa markayla uyumlu olur */
+  box-shadow: 0 0 10px rgba(255,255,255,0.3);
+  text-decoration: none;
+}

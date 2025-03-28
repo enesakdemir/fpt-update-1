@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Giriş</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 2rem; }
+    .login-box { background: white; padding: 2rem; max-width: 400px; margin: auto; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
+    input[type=text], input[type=password] { width: 100%; padding: 0.5rem; margin: 0.5rem 0; border: 1px solid #ccc; border-radius: 5px; }
+    button { width: 100%; padding: 0.5rem; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Admin Giriş</h2>
+    <input type="text" id="username" placeholder="Kullanıcı Adı" />
+    <input type="password" id="password" placeholder="Şifre" />
+    <button onclick="login()">Giriş Yap</button>
+  </div>
+
+  <script>
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      fetch('/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ username, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          localStorage.setItem("loggedIn", "true");
+          window.location.href = "/admin-excel-upload.html";
+        } else {
+          alert("Hatalı giriş.");
+        }
+      });
+    }
+  </script>
+</body>
+</html>
