@@ -98,14 +98,15 @@
     }
 
     function saveJSON() {
-      fetch('/save-json', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentJSON)
-      }).then(res => res.json()).then(data => {
-        alert("Veri kaydedildi.");
-      });
-    }
+  fetch('https://fpt-backend-clean.onrender.com/api/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(currentJSON)
+  }).then(res => res.json()).then(data => {
+    alert("Veri kaydedildi.");
+  });
+}
+
 
     function exportCSV() {
       const csv = [
