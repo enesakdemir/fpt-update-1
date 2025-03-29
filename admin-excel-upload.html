@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -26,11 +25,10 @@
   <button onclick="logout()" style="float: right; margin-bottom: 10px;">Çıkış Yap</button>
 
   <script>
-    // Sayfa yüklendiğinde çalışır
     window.onload = function () {
       const isLoggedIn = localStorage.getItem("loggedIn");
       if (isLoggedIn !== "true") {
-        window.location.href = "login.html"; // Giriş yapılmamışsa yönlendir
+        window.location.href = "login.html";
       }
     }
   </script>
@@ -98,15 +96,29 @@
     }
 
     function saveJSON() {
-  fetch('https://fpt-backend-clean.onrender.com/api/upload', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(currentJSON)
-  }).then(res => res.json()).then(data => {
-    alert("Veri kaydedildi.");
-  });
-}
+      if (currentJSON.length === 0) {
+        alert("Kaydedilecek veri yok.");
+        return;
+      }
 
+      fetch('https://fpt-backend-mongo.onrender.com/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentJSON)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.message.includes("başarı")) {
+          alert("✅ Veri başarıyla kaydedildi.");
+        } else {
+          alert("⚠️ Sunucudan beklenmeyen yanıt alındı.");
+        }
+      })
+      .catch(err => {
+        console.error("Kaydetme hatası:", err);
+        alert("❌ Kaydetme sırasında bir hata oluştu. Lütfen tekrar dene.");
+      });
+    }
 
     function exportCSV() {
       const csv = [
@@ -121,13 +133,11 @@
       a.download = "export.csv";
       a.click();
     }
-  </script>
-  <script>
+
     function logout() {
       localStorage.removeItem("loggedIn");
       window.location.href = "login.html";
     }
   </script>
-  
 </body>
 </html>
