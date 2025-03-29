@@ -25,7 +25,7 @@
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
 
-  fetch('https://fpt-backend-clean.onrender.com/api/login', {
+  fetch('https://fpt-backend-mongo.onrender.com/api/login', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ username, password })
