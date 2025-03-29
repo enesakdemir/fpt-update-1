@@ -6,7 +6,6 @@
       window.location.href = "login.html";
     }
   </script>
-  
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Panel</title>
@@ -24,15 +23,6 @@
 <body>
   <button onclick="logout()" style="float: right; margin-bottom: 10px;">Çıkış Yap</button>
 
-  <script>
-    window.onload = function () {
-      const isLoggedIn = localStorage.getItem("loggedIn");
-      if (isLoggedIn !== "true") {
-        window.location.href = "login.html";
-      }
-    }
-  </script>
-  
   <div class="container">
     <h2>Excel'den JSON'a Veri Yükle</h2>
     <input type="file" id="excelFile" accept=".xlsx,.xls" />
@@ -49,7 +39,7 @@
     function convertToJSON() {
       const fileInput = document.getElementById('excelFile');
       const file = fileInput.files[0];
-      if (!file) return alert("Dosya seçmedin reis.");
+      if (!file) return alert("📂 Dosya seçmedin reis.");
 
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -69,14 +59,14 @@
 
     function renderTable() {
       const container = document.getElementById("tableContainer");
-      if (currentJSON.length === 0) return container.innerHTML = "<p>Veri yok</p>";
+      if (currentJSON.length === 0) return container.innerHTML = "<p>📭 Veri yok</p>";
 
       let html = '<table class="json-table"><thead><tr><th>Part No</th><th>Part Adı</th><th>Stok</th><th>İşlem</th></tr></thead><tbody>';
       currentJSON.forEach((item, index) => {
         html += `<tr>
           <td><input value="${item.partNumber}" onchange="updateField(${index}, 'partNumber', this.value)" /></td>
           <td><input value="${item.partName}" onchange="updateField(${index}, 'partName', this.value)" /></td>
-          <td><input value="${item.stock}" onchange="updateField(${index}, 'stock', parseInt(this.value))" /></td>
+          <td><input type="number" value="${item.stock}" onchange="updateField(${index}, 'stock', parseInt(this.value))" /></td>
           <td class="action-buttons">
             <button onclick="deleteRow(${index})">Sil</button>
           </td>
@@ -97,7 +87,7 @@
 
     function saveJSON() {
       if (currentJSON.length === 0) {
-        alert("Kaydedilecek veri yok.");
+        alert("📭 Kaydedilecek veri yok.");
         return;
       }
 
@@ -109,9 +99,10 @@
       .then(res => res.json())
       .then(data => {
         if (data.message.includes("başarı")) {
-          alert("✅ Veri başarıyla kaydedildi.");
+          alert("✅ Veri başarıyla kaydedildi!");
         } else {
-          alert("⚠️ Sunucudan beklenmeyen yanıt alındı.");
+          console.warn("⚠️ Sunucudan gelen yanıt:", data);
+          alert("⚠️ Sunucudan beklenmeyen yanıt geldi.");
         }
       })
       .catch(err => {
